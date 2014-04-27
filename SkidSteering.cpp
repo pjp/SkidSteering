@@ -9,7 +9,7 @@
 #include "SkidSteering.h"
 
 // default constructor
-SkidSteering::SkidSteering()
+SkidSteering::SkidSteering(MotorPinDefinition leftMotor, MotorPinDefinition rightMotor)
 {
 	directionIsForward					= true;	// General direction of travel.
 
@@ -18,6 +18,10 @@ SkidSteering::SkidSteering()
 	directionIsForwardForRightMotor		= directionIsForward;	// For spinning possible on the spot
 
 	brakesAreOn							= true;	// Motor brakes applied.
+	
+	leftMotorPinDef						= leftMotor;
+	
+	rightMotorPinDef					= rightMotor;
 	
 	setupMotorShield();
 } 
@@ -32,12 +36,12 @@ void SkidSteering::setupMotorShield() {
 	// Motor Shield
 	//
 	// Setup Channel A - LEFT
-	pinMode(MOTOR_LEFT_DIRECTION_PIN,	OUTPUT);	// Motor pin
-	pinMode(MOTOR_LEFT_BRAKE_PIN,		OUTPUT);	// Brake pin
+	pinMode(leftMotorPinDef.motorDirection,	OUTPUT);		// Motor pin
+	pinMode(leftMotorPinDef.motorBrake,		OUTPUT);		// Brake pin
 	
 	// Setup Channel B - RIGHT
-	pinMode(MOTOR_RIGHT_DIRECTION_PIN,	OUTPUT);	// Motor pin
-	pinMode(MOTOR_RIGHT_BRAKE_PIN,		OUTPUT);	// Brake pin
+	pinMode(rightMotorPinDef.motorDirection,	OUTPUT);	// Motor pin
+	pinMode(rightMotorPinDef.motorBrake,		OUTPUT);	// Brake pin
 	
 	/////////////////////////////
 	// Initially apply the brakes
@@ -160,8 +164,8 @@ void SkidSteering::processInputs(short rawThrottle, short rawSteering, short raw
 	if(! brakesAreOn) {
 		//////////////////
 		// Spin the motors
-		setMotorSpeed(MOTOR_LEFT_SPEED_PIN, throttleLeft);
-		setMotorSpeed(MOTOR_RIGHT_SPEED_PIN, throttleRight);
+		setMotorSpeed(leftMotorPinDef.motorSpeed,	throttleLeft);
+		setMotorSpeed(rightMotorPinDef.motorSpeed,	throttleRight);
 	}
 }
 
@@ -227,9 +231,9 @@ void SkidSteering::handleTurningLeft(
 
 			if(directionIsForward != directionIsForwardForLeftMotor) {
 				if(directionIsForward) {
-					setDirectionOfMotorToForward(MOTOR_LEFT_DIRECTION_PIN, true);
-					} else {
-					setDirectionOfMotorToForward(MOTOR_LEFT_DIRECTION_PIN, false);
+					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
+				} else {
+					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
 				}
 			}
 		} else {
@@ -241,9 +245,9 @@ void SkidSteering::handleTurningLeft(
 			// Reverse the direction of this motor compared to the other and increase it's speed
 			if(directionIsForward == directionIsForwardForLeftMotor) {
 				if(directionIsForward) {
-					setDirectionOfMotorToForward(MOTOR_LEFT_DIRECTION_PIN, false);
+					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
 				} else {
-					setDirectionOfMotorToForward(MOTOR_LEFT_DIRECTION_PIN, true);
+					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
 				}
 			}
 		}
@@ -269,9 +273,9 @@ void SkidSteering::handleTurningRight(
 
 			if(directionIsForward != directionIsForwardForRightMotor) {
 				if(directionIsForward) {
-					setDirectionOfMotorToForward(MOTOR_RIGHT_DIRECTION_PIN, true);
+					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
 				} else {
-					setDirectionOfMotorToForward(MOTOR_RIGHT_DIRECTION_PIN, false);
+					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
 				}
 			}
 		} else {
@@ -283,9 +287,9 @@ void SkidSteering::handleTurningRight(
 			// Reverse the direction of this motor compared to the other and increase it's speed
 			if(directionIsForward == directionIsForwardForRightMotor) {
 				if(directionIsForward) {
-					setDirectionOfMotorToForward(MOTOR_RIGHT_DIRECTION_PIN, false);
+					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
 				} else {
-					setDirectionOfMotorToForward(MOTOR_RIGHT_DIRECTION_PIN, true);
+					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
 				}
 			}
 		}
@@ -307,15 +311,15 @@ float SkidSteering::getMilliAmpsPerMotor(uint8_t motorPin) {
 }
 
 void SkidSteering::setBothMotorBrakesOn() {
-	setMotorBrake(MOTOR_LEFT_BRAKE_PIN, true);
-	setMotorBrake(MOTOR_RIGHT_BRAKE_PIN, true);
+	setMotorBrake(leftMotorPinDef.motorBrake, true);
+	setMotorBrake(rightMotorPinDef.motorBrake, true);
 	
 	brakesAreOn	=	true;
 }
 
 void SkidSteering::setBothMotorBrakesOff() {
-	setMotorBrake(MOTOR_LEFT_BRAKE_PIN, false);
-	setMotorBrake(MOTOR_RIGHT_BRAKE_PIN, false);
+	setMotorBrake(leftMotorPinDef.motorBrake, false);
+	setMotorBrake(rightMotorPinDef.motorBrake, false);
 	
 	brakesAreOn	=	false;
 }
@@ -329,15 +333,15 @@ void SkidSteering::setMotorBrake(uint8_t pin, boolean on) {
 }
 
 void SkidSteering::setDirectionOfBothMotorsToForward() {
-	setDirectionOfMotorToForward(MOTOR_LEFT_DIRECTION_PIN, true);
-	setDirectionOfMotorToForward(MOTOR_RIGHT_DIRECTION_PIN, true);
+	setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
+	setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
 	
 	directionIsForward	= true;
 }
 
 void SkidSteering::setDirectionOfBothMotorsToReverse() {
-	setDirectionOfMotorToForward(MOTOR_LEFT_DIRECTION_PIN, false);
-	setDirectionOfMotorToForward(MOTOR_RIGHT_DIRECTION_PIN, false);
+	setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
+	setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
 
 	directionIsForward	= false;
 }
@@ -346,7 +350,7 @@ void SkidSteering::setDirectionOfMotorToForward(uint8_t pin, boolean forward) {
 	if(forward) {
 		digitalWrite(pin, HIGH);
 		
-		if(pin == MOTOR_LEFT_DIRECTION_PIN) {
+		if(pin == leftMotorPinDef.motorDirection) {
 			directionIsForwardForLeftMotor	= true;
 		} else {
 			directionIsForwardForRightMotor	= true;
@@ -354,7 +358,7 @@ void SkidSteering::setDirectionOfMotorToForward(uint8_t pin, boolean forward) {
 	} else {
 		digitalWrite(pin, LOW);
 		
-		if(pin == MOTOR_LEFT_DIRECTION_PIN) {
+		if(pin == leftMotorPinDef.motorDirection) {
 			directionIsForwardForLeftMotor	= false;
 		} else {
 			directionIsForwardForRightMotor	= false;
@@ -363,8 +367,8 @@ void SkidSteering::setDirectionOfMotorToForward(uint8_t pin, boolean forward) {
 }
 
 void SkidSteering::setBothMotorsSpeed(short value) {
-	setMotorSpeed(MOTOR_LEFT_SPEED_PIN, value);
-	setMotorSpeed(MOTOR_RIGHT_SPEED_PIN, value);
+	setMotorSpeed(leftMotorPinDef.motorSpeed,	value);
+	setMotorSpeed(rightMotorPinDef.motorSpeed,	value);
 }
 
 void SkidSteering::setMotorSpeed(uint8_t pin, short value) {

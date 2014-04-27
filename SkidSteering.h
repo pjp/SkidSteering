@@ -19,13 +19,6 @@
 #define QUARTER_PULSE_WIDTH			(MIN_PULSE_WIDTH + (FULL_PULSE_WIDTH / 4))
 #define THREE_QUARTERS_PULSE_WIDTH	(MIN_PULSE_WIDTH + (3 * (FULL_PULSE_WIDTH / 4)))
 
-/////////////////////////////
-// Battery voltage input pins
-#define MOTOR_LEFT_PIN_AMPS	0	// Voltage proportional to Amps drawn
-#define MOTOR_RIGHT_PIN_AMPS	1	// Voltage proportional to Amps drawn
-
-#define SUPPLY_VOLTAGE_PIN	2	// Analogue pin
-
 #define	MIN_PULSE_WIDTH		1000
 #define	MAX_PULSE_WIDTH		2000
 #define	WAIT_FOR_PULSE		20000
@@ -35,27 +28,20 @@
 
 #define VOLTS_PER_AMP		1.65
 
-/////////////////
-// For the motors
-#define DIRECTION_BRAKE_ON	0
-#define DIRECTION_FORWARD	1
-#define DIRECTION_REVERSE	2
-
-#define MOTOR_LEFT_BRAKE_PIN	9
-#define MOTOR_RIGHT_BRAKE_PIN	8
-
-#define MOTOR_LEFT_DIRECTION_PIN	12
-#define MOTOR_RIGHT_DIRECTION_PIN	13
-
-#define MOTOR_LEFT_SPEED_PIN		3
-#define MOTOR_RIGHT_SPEED_PIN		11
-
 const uint8_t REFERENCE_VOLTS	=	5;   // the default reference on a 5-volt board
 const float VOLTS_PER_BIT		=	REFERENCE_VOLTS / 1024.0;
 const float RESISTOR_FACTOR		=	1024.0 / 2;
 
 const int MIN_MILLI_VOLTS			=	6600;	// 6 * 1.1
 const int MAX_MILLI_VOLTS			=	8400;	// 6 * 1.4
+
+struct MotorPinDefinition {
+	uint8_t motorAmps;
+	uint8_t motorBrake;
+	uint8_t motorDirection;
+	uint8_t motorSpeed;
+};
+
 
 class SkidSteering
 {
@@ -71,11 +57,12 @@ private:
 	bool directionIsForwardForLeftMotor;
 	bool directionIsForwardForRightMotor;
 	bool brakesAreOn;
-	
+
+	MotorPinDefinition leftMotorPinDef, rightMotorPinDef;
 	
 //functions
 public:
-	SkidSteering();
+	SkidSteering(MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
 	~SkidSteering();
 	void processInputs(short rawThrottle, short rawSteering, short rawDirection);
 	

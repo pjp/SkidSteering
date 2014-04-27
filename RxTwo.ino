@@ -1,5 +1,5 @@
 #include "DisplayValueOnLed.h"
-#include "SkidSteering.h""
+#include "SkidSteering.h"
 
 //////////////////////////////
 //The throttle and rudder pins
@@ -12,7 +12,8 @@
 #define SUPPLY_VOLTAGE_PIN	2	// Analogue pin
 
 DisplayValueOnLed			dvol(LED_PIN, 0, 1, 8);	// For using the LED to display battery state
-SkidSteering				skidSteering;
+
+SkidSteering				*skidSteering;
 
 void setup()
 {
@@ -20,6 +21,23 @@ void setup()
 		Serial.begin(115200);
 	#endif
 
+	struct MotorPinDefinition leftMotor;
+	struct MotorPinDefinition rightMotor;
+
+	///////////////////
+	// Define motor pins
+	leftMotor.motorAmps			=	0;			
+	leftMotor.motorBrake		=	9;
+	leftMotor.motorDirection	=	12;
+	leftMotor.motorSpeed		=	3;
+	
+	rightMotor.motorAmps		=	1;
+	rightMotor.motorBrake		=	8;
+	rightMotor.motorDirection	=	13;
+	rightMotor.motorSpeed		=	11;
+	
+	skidSteering	= new SkidSteering(leftMotor, rightMotor);
+	
 	setupRxInput();
 }
 
@@ -36,7 +54,7 @@ void loop()
 	
 	/////////////////////
 	// Process the inputs
-	skidSteering.processInputs(throttleIn, steeringIn, directionIn);
+	skidSteering->processInputs(throttleIn, steeringIn, directionIn);
 	
 	///////////////////
 	// Handle LED state
