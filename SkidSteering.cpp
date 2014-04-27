@@ -9,7 +9,7 @@
 #include "SkidSteering.h"
 
 // default constructor
-SkidSteering::SkidSteering(MotorPinDefinition leftMotor, MotorPinDefinition rightMotor)
+SkidSteering::SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor)
 {
 	directionIsForward					= true;	// General direction of travel.
 
@@ -18,6 +18,8 @@ SkidSteering::SkidSteering(MotorPinDefinition leftMotor, MotorPinDefinition righ
 	directionIsForwardForRightMotor		= directionIsForward;	// For spinning possible on the spot
 
 	brakesAreOn							= true;	// Motor brakes applied.
+	
+	steeringConfig						= config;
 	
 	leftMotorPinDef						= leftMotor;
 	
@@ -72,7 +74,7 @@ void SkidSteering::processInputs(short rawThrottle, short rawSteering, short raw
 		if(! brakesAreOn) {
 			setBothMotorBrakesOn();
 			
-			delay(DIRECTION_CHANGE_DELAY_MS);
+			delay(steeringConfig.directionChangeDelay);
 		}
 	} else if(rawDirection > THREE_QUARTERS_PULSE_WIDTH) {
 		// Set the direction to reverse if not already so
@@ -80,7 +82,7 @@ void SkidSteering::processInputs(short rawThrottle, short rawSteering, short raw
 			setDirectionOfBothMotorsToReverse();
 			setBothMotorBrakesOff();
 			
-			delay(DIRECTION_CHANGE_DELAY_MS);
+			delay(steeringConfig.directionChangeDelay);
 		}
 	} else {
 		// Set the direction to forward if not already so
@@ -88,7 +90,7 @@ void SkidSteering::processInputs(short rawThrottle, short rawSteering, short raw
 			setDirectionOfBothMotorsToForward();
 			setBothMotorBrakesOff();
 			
-			delay(DIRECTION_CHANGE_DELAY_MS);
+			delay(steeringConfig.directionChangeDelay);
 		}
 	}
 
@@ -98,10 +100,10 @@ void SkidSteering::processInputs(short rawThrottle, short rawSteering, short raw
 	
 	//////////////////////////////////////////////////////////////
 	// Work out the relative throttle values with steering applied
-	if(steering < (HALF_RANGE_INPUT - DEAD_ZONE)) {
+	if(steering < (HALF_RANGE_INPUT - steeringConfig.deadZone)) {
 		handleTurning(LEFT, throttle, steering, steeringOffsetFromCentre, &throttleLeft, &throttleRight);
 		
-	} else if(steering > (HALF_RANGE_INPUT + DEAD_ZONE)) {
+	} else if(steering > (HALF_RANGE_INPUT + steeringConfig.deadZone)) {
 		handleTurning(RIGHT, throttle, steering, steeringOffsetFromCentre, &throttleLeft, &throttleRight);
 		
 	} else {
@@ -303,9 +305,9 @@ float SkidSteering::getMilliAmpsPerMotor(uint8_t motorPin) {
 
 	int   voltsMotor		= analogRead(motorPin) ;
 	
-	float volts				= voltsMotor * VOLTS_PER_BIT;
+	float volts				= voltsMotor * steeringConfig.voltsPerBit;
 	
-	float milliAmpsForMotor	= (volts * 1000) / VOLTS_PER_AMP;  // read the value from the sensor
+	float milliAmpsForMotor	= (volts * 1000) / steeringConfig.voltsPerAmp;  // read the value from the sensor
 	
 	return milliAmpsForMotor;
 }
