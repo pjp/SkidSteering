@@ -99,7 +99,7 @@ void loop()
 	uint8_t throttle	= map(throttleIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : throttleIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 	uint8_t steering	= map(steeringIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : steeringIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 
-	/////////////////////////////////////////////
+	///////////////////////////////////////////
 	// Figure out the 3 position heading switch
 	
 	HEADING heading;
@@ -115,6 +115,8 @@ void loop()
 		
 	}
 	
+	////////////////////
+	// Drive the vehicle
 	skidSteering->processInputs(throttle, steering, heading);
 	
 	///////////////////

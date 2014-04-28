@@ -50,6 +50,13 @@ void SkidSteering::setupMotorShield() {
 	setBothMotorBrakesOn();
 }
 
+/************************************************************************/
+/*                                                                      */
+/* @param throttle  0-255                                               */
+/* @param steering  0 = full left, 127 = ahead, 255 full right          */
+/* @param heading   STOPPED, FORWARD, BACKWARD                          */
+/*                                                                      */
+/************************************************************************/
 void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING heading) {
 	
 	switch(heading) {
