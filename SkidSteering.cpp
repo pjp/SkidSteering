@@ -50,48 +50,38 @@ void SkidSteering::setupMotorShield() {
 	setBothMotorBrakesOn();
 }
 
-void SkidSteering::processInputs(short rawThrottle, short rawSteering, short rawDirection) {
-	/////////////////////////////
-	// Check if the radios are on
-	if(rawThrottle < (MIN_PULSE_WIDTH / 2)) {
-		// Receiver or transmitter not on
-		#if defined(VM_DEBUG)
-			Serial.println("Radios not on");
-		#endif
-		
-		return;
-	}
-
-	///////////////////////
-	// Normalize the inputs
-	uint8_t throttle	= map(rawThrottle	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : rawThrottle,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
-	uint8_t steering	= map(rawSteering	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : rawSteering,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
+void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING heading) {
 	
-	/////////////////////////////////////////////
-	// Figure out the 3 position direction switch
-	if(rawDirection < QUARTER_PULSE_WIDTH) {
-		// Apply the brakes if not already on
-		if(! brakesAreOn) {
-			setBothMotorBrakesOn();
+	switch(heading) {
+		case STOPPED:
+			// Apply the brakes if not already on
+			if(! brakesAreOn) {
+				setBothMotorBrakesOn();
 			
-			delay(steeringConfig.directionChangeDelay);
-		}
-	} else if(rawDirection > THREE_QUARTERS_PULSE_WIDTH) {
-		// Set the direction to reverse if not already so
-		if(directionIsForward) {
-			setDirectionOfBothMotorsToReverse();
-			setBothMotorBrakesOff();
+				delay(steeringConfig.directionChangeDelay);
+			}
+
+			break;
+		case FORWARD:
+			// Set the direction to forward if not already so
+			if(! directionIsForward) {
+				setDirectionOfBothMotorsToForward();
+				setBothMotorBrakesOff();
 			
-			delay(steeringConfig.directionChangeDelay);
-		}
-	} else {
-		// Set the direction to forward if not already so
-		if(! directionIsForward) {
-			setDirectionOfBothMotorsToForward();
-			setBothMotorBrakesOff();
+				delay(steeringConfig.directionChangeDelay);
+			}
 			
-			delay(steeringConfig.directionChangeDelay);
-		}
+			break;
+		case BACKWARD:
+			// Set the direction to reverse if not already so
+			if(directionIsForward) {
+				setDirectionOfBothMotorsToReverse();
+				setBothMotorBrakesOff();
+			
+				delay(steeringConfig.directionChangeDelay);
+			}
+			
+			break;
 	}
 
 	uint8_t throttleLeft					= 0;

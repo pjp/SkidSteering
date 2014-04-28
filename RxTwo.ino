@@ -14,6 +14,10 @@
 #define TICK_DELAY_MS		250		// How long (in mS) to delay in each loop
 #define DIRECTION_CHANGE_DELAY_MS	500		// How long (in mS) to delay after a direction change
 
+#define	MIN_PULSE_WIDTH		1000
+#define	MAX_PULSE_WIDTH		2000
+#define	WAIT_FOR_PULSE		20000
+
 const int MIN_MILLI_VOLTS		=	6600;	// 6 * 1.1
 const int MAX_MILLI_VOLTS		=	8400;	// 6 * 1.4
 const uint8_t REFERENCE_VOLTS	=	5;   // the default reference on a 5-volt board
@@ -72,11 +76,46 @@ void loop()
 	// Read the pulses on the pins from the RX
 	short throttleIn	= pulseIn(THROTTLE,		HIGH, WAIT_FOR_PULSE);
 	short steeringIn	= pulseIn(STEERING,		HIGH, WAIT_FOR_PULSE);
-	short directionIn	= pulseIn(DIRECTION,	HIGH, WAIT_FOR_PULSE);
+	short headingIn		= pulseIn(DIRECTION,	HIGH, WAIT_FOR_PULSE);
 	
-	/////////////////////
-	// Process the inputs
-	skidSteering->processInputs(throttleIn, steeringIn, directionIn);
+	/////////////////////////////
+	// Check if the radios are on
+	if(throttleIn < (MIN_PULSE_WIDTH / 2)) {
+		// Receiver or transmitter not on
+		#if defined(VM_DEBUG)
+			Serial.println("Radios not on");
+		#endif
+		
+		///////////////////
+		// Handle LED state
+		updateLedValue();
+
+		return;
+	}
+
+	
+	/////////////////////////
+	// Normalize these inputs
+	uint8_t throttle	= map(throttleIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : throttleIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
+	uint8_t steering	= map(steeringIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : steeringIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
+
+	/////////////////////////////////////////////
+	// Figure out the 3 position heading switch
+	
+	HEADING heading;
+	
+	if(headingIn < QUARTER_PULSE_WIDTH) {
+		heading	=	STOPPED;
+		
+	} else if(headingIn > THREE_QUARTERS_PULSE_WIDTH) {
+		heading	=	BACKWARD;
+		
+	} else {
+		heading	=	FORWARD;
+		
+	}
+	
+	skidSteering->processInputs(throttle, steering, heading);
 	
 	///////////////////
 	// Handle LED state

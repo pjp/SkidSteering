@@ -18,9 +18,6 @@
 #define QUARTER_PULSE_WIDTH			(MIN_PULSE_WIDTH + (FULL_PULSE_WIDTH / 4))
 #define THREE_QUARTERS_PULSE_WIDTH	(MIN_PULSE_WIDTH + (3 * (FULL_PULSE_WIDTH / 4)))
 
-#define	MIN_PULSE_WIDTH		1000
-#define	MAX_PULSE_WIDTH		2000
-#define	WAIT_FOR_PULSE		20000
 
 struct MotorPinDefinition {
 	uint8_t motorAmps;
@@ -35,6 +32,9 @@ struct SteeringConfig {
 	float voltsPerAmp;
 	float voltsPerBit;
 };
+
+enum HEADING		{STOPPED, FORWARD, BACKWARD};
+enum TURN_DIRECTION {LEFT, AHEAD, RIGHT};
 
 class SkidSteering
 {
@@ -60,11 +60,11 @@ private:
 public:
 	SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
 	~SkidSteering();
-	void processInputs(short rawThrottle, short rawSteering, short rawDirection);
+	void processInputs(uint8_t throttle, uint8_t steering, HEADING heading);
 	
 protected:
 private:
-	enum TURN_DIRECTION {LEFT, AHEAD, RIGHT};
+		
 		
 	SkidSteering( const SkidSteering &c );
 	SkidSteering& operator=( const SkidSteering &c );
