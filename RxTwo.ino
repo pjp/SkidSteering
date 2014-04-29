@@ -122,6 +122,10 @@ void loop()
 	///////////////////
 	// Handle LED state
 	updateLedValue();
+	
+	#if defined(VM_DEBUG)
+		Serial.println();
+	#endif
 }
 
 
@@ -150,7 +154,7 @@ void updateLedValue() {
 
 	#if defined(VM_DEBUG)
 		Serial.print(" V:");
-		Serial.println(milliVolts);
+		Serial.print(milliVolts);
 	#endif	
 	
 	/////////////////////////////////////////////////////////
