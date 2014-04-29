@@ -61,13 +61,13 @@ public:
 	SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
 	~SkidSteering();
 	void processInputs(uint8_t throttle, uint8_t steering, HEADING heading);
-	
-protected:
+
 private:
-		
-		
+
 	SkidSteering( const SkidSteering &c );
 	SkidSteering& operator=( const SkidSteering &c );
+	
+protected:
 	
 	void setupMotorShield();
 	

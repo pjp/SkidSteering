@@ -143,19 +143,12 @@ void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING hea
 	Serial.print(" Bo:");
 	Serial.print(brakesAreOn);
 
-	float value	= getSupplyVoltage();
-	Serial.print(" V:");
-	Serial.print(value);
-
-	value	= getMilliAmpsPerMotor(MOTOR_LEFT_PIN_AMPS);
 	Serial.print(" mAl:");
-	Serial.print(value);
+	Serial.print(getMilliAmpsPerMotor(leftMotorPinDef.motorAmps));
 	
-	value	= getMilliAmpsPerMotor(MOTOR_RIGHT_PIN_AMPS);
 	Serial.print(" mAr:");
-	Serial.print(value);
+	Serial.print(getMilliAmpsPerMotor(rightMotorPinDef.motorAmps));
 	
-	Serial.println();
 	#endif
 	
 	/////////////////////

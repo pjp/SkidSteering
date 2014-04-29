@@ -147,6 +147,11 @@ void updateLedValue() {
 	if(milliVolts < MIN_MILLI_VOLTS) {
 		milliVolts	=	MIN_MILLI_VOLTS;
 	}
+
+	#if defined(VM_DEBUG)
+		Serial.print(" V:");
+		Serial.println(milliVolts);
+	#endif	
 	
 	/////////////////////////////////////////////////////////
 	// Just need a range from 1..10 to indicate battery state
