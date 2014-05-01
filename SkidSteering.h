@@ -71,6 +71,8 @@ protected:
 	
 	void setupMotorShield();
 	
+	String ftos(float value, int digitCount, int decimalPointsCount);
+	
 	void handleTurning(
 		TURN_DIRECTION direction,
 		uint8_t throttle,

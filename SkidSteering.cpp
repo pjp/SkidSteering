@@ -15,7 +15,7 @@ SkidSteering::SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, 
 
 	directionIsForwardForLeftMotor		= directionIsForward;	// For possible spinning on the spot
 	
-	directionIsForwardForRightMotor		= directionIsForward;	// For spinning possible on the spot
+	directionIsForwardForRightMotor		= directionIsForward;	// For possible spinning on the spot
 
 	brakesAreOn							= true;	// Motor brakes applied.
 	
@@ -145,15 +145,11 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING h
 	state += brakesAreOn;
 
 	state += " mAl:";
-	char tmpL[12];
-	String fvalL = dtostrf(getMilliAmpsPerMotor(leftMotorPinDef.motorAmps), 7,2, tmpL);
-	state.concat(fvalL);
+	state.concat(ftos(getMilliAmpsPerMotor(leftMotorPinDef.motorAmps), 7, 2));
 	
 	state += " mAr:";
-	char tmpR[12];
-	String fvalR = dtostrf(getMilliAmpsPerMotor(rightMotorPinDef.motorAmps), 7,2, tmpR);
-	state.concat(fvalR);
-	
+	state.concat(ftos(getMilliAmpsPerMotor(rightMotorPinDef.motorAmps), 7, 2));
+
 	/////////////////////
 	// Can we now move  ?
 	if(! brakesAreOn) {
@@ -164,6 +160,17 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING h
 	}
 	
 	return state;
+}
+
+/************************************************************************/
+/* Convert a float value to it's String representation                  */
+/************************************************************************/
+String SkidSteering::ftos(float value, int digitCount, int decimalPointsCount) {
+	char tmp[digitCount + decimalPointsCount + 2];	
+	
+	String fval = dtostrf(value, digitCount, decimalPointsCount, tmp);
+	
+	return fval;
 }
 
 void SkidSteering::handleTurning(
