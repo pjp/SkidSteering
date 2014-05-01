@@ -83,12 +83,16 @@ void loop()
 	if(throttleIn < (MIN_PULSE_WIDTH / 2)) {
 		// Receiver or transmitter not on
 		#if defined(VM_DEBUG)
-			Serial.println("Radios not on");
+			Serial.print("Radios not on");
 		#endif
 		
 		///////////////////
 		// Handle LED state
 		updateLedValue();
+		
+		#if defined(VM_DEBUG)
+			Serial.println("");
+		#endif
 
 		return;
 	}
@@ -117,14 +121,14 @@ void loop()
 	
 	////////////////////
 	// Drive the vehicle
-	skidSteering->processInputs(throttle, steering, heading);
+	String state	=	skidSteering->processInputs(throttle, steering, heading);
 	
 	///////////////////
 	// Handle LED state
 	updateLedValue();
 	
 	#if defined(VM_DEBUG)
-		Serial.println();
+		Serial.println(state);
 	#endif
 }
 

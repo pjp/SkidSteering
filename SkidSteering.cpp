@@ -55,10 +55,17 @@ void SkidSteering::setupMotorShield() {
 /* @param throttle  0-255                                               */
 /* @param steering  0 = full left, 127 = ahead, 255 full right          */
 /* @param heading   STOPPED, FORWARD, BACKWARD                          */
-/*                                                                      */
+/* @return A String containing the state of the variables               */
 /************************************************************************/
-void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING heading) {
+String SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING heading) {
+	String state	=	"";
 	
+	state += " T:";
+	state.concat(throttle);
+	
+	state += " S:";
+	state.concat(steering);
+
 	switch(heading) {
 		case STOPPED:
 			// Apply the brakes if not already on
@@ -67,7 +74,7 @@ void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING hea
 			
 				delay(steeringConfig.directionChangeDelay);
 			}
-
+			state +=	" Hd:S";
 			break;
 		case FORWARD:
 			// Set the direction to forward if not already so
@@ -77,7 +84,7 @@ void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING hea
 			
 				delay(steeringConfig.directionChangeDelay);
 			}
-			
+			state +=	" Hd:F";
 			break;
 		case BACKWARD:
 			// Set the direction to reverse if not already so
@@ -87,25 +94,31 @@ void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING hea
 			
 				delay(steeringConfig.directionChangeDelay);
 			}
-			
+			state +=	" Hd:B";
 			break;
 	}
 
-	uint8_t throttleLeft					= 0;
-	uint8_t throttleRight					= 0;
 	uint8_t steeringOffsetFromCentre		= abs(HALF_RANGE_INPUT - steering);
 	
+	state += " So:";
+	state += steeringOffsetFromCentre;
+
 	//////////////////////////////////////////////////////////////
 	// Work out the relative throttle values with steering applied
+	uint8_t throttleLeft					= 0;
+	uint8_t throttleRight					= 0;
+
+	state += " Ht:";
+
 	if(steering < (HALF_RANGE_INPUT - steeringConfig.deadZone)) {
 		handleTurning(LEFT, throttle, steering, steeringOffsetFromCentre, &throttleLeft, &throttleRight);
-		
+		state += "l";
 	} else if(steering > (HALF_RANGE_INPUT + steeringConfig.deadZone)) {
 		handleTurning(RIGHT, throttle, steering, steeringOffsetFromCentre, &throttleLeft, &throttleRight);
-		
+		state += "r";
 	} else {
 		handleTurning(AHEAD, throttle, steering, steeringOffsetFromCentre, &throttleLeft, &throttleRight);
-		
+		state += "a";
 	}
 	
 	////////////////
@@ -113,43 +126,33 @@ void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING hea
 	throttleLeft	=	constrain(throttleLeft, 0, FULL_RANGE_INPUT);
 	throttleRight	=	constrain(throttleRight, 0, FULL_RANGE_INPUT);
 	
-	#if defined(VM_DEBUG)
-	///////////////
-	// Debug output
-	Serial.print("T:");
-	Serial.print(throttle);
-	
-	Serial.print(" S:");
-	Serial.print(steering);
-	
-	Serial.print(" So:");
-	Serial.print(steeringOffsetFromCentre);
-	
-	Serial.print(" Tl:");
-	Serial.print(throttleLeft);
+	state += " Tl:";
+	state += throttleLeft;
 
-	Serial.print(" Tr:");
-	Serial.print(throttleRight);
+	state += " Tr:";
+	state += throttleRight;
 
-	Serial.print(" Df:");
-	Serial.print(directionIsForward);
+	state += " Df:";
+	state += directionIsForward;
 	
-	Serial.print(" Dfl:");
-	Serial.print(directionIsForwardForLeftMotor);
+	state += " Dfl:";
+	state +=directionIsForwardForLeftMotor;
 	
-	Serial.print(" Dfr:");
-	Serial.print(directionIsForwardForRightMotor);
+	state += " Dfr:";
+	state += directionIsForwardForRightMotor;
 	
-	Serial.print(" Bo:");
-	Serial.print(brakesAreOn);
+	state += " Bo:";
+	state += brakesAreOn;
 
-	Serial.print(" mAl:");
-	Serial.print(getMilliAmpsPerMotor(leftMotorPinDef.motorAmps));
+	state += " mAl:";
+	char tmpL[12];
+	String fvalL = dtostrf(getMilliAmpsPerMotor(leftMotorPinDef.motorAmps), 7,2, tmpL);
+	state.concat(fvalL);
 	
-	Serial.print(" mAr:");
-	Serial.print(getMilliAmpsPerMotor(rightMotorPinDef.motorAmps));
-	
-	#endif
+	state += " mAr:";
+	char tmpR[12];
+	String fvalR = dtostrf(getMilliAmpsPerMotor(rightMotorPinDef.motorAmps), 7,2, tmpR);
+	state.concat(fvalR);
 	
 	/////////////////////
 	// Can we now move  ?
@@ -159,6 +162,8 @@ void SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING hea
 		setMotorSpeed(leftMotorPinDef.motorSpeed,	throttleLeft);
 		setMotorSpeed(rightMotorPinDef.motorSpeed,	throttleRight);
 	}
+	
+	return state;
 }
 
 void SkidSteering::handleTurning(
