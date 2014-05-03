@@ -42,7 +42,7 @@ void setup()
 
 	//////////////////////////
 	// Define steering configuration
-	config.deadZone				= (FULL_RANGE_INPUT / 50);
+	config.deadZone				= 10;
 	config.directionChangeDelay	= DIRECTION_CHANGE_DELAY_MS;
 	config.voltsPerAmp			= VOLTS_PER_AMP;
 	config.voltsPerBit			= VOLTS_PER_BIT;
@@ -83,6 +83,7 @@ void loop()
 		// Receiver or transmitter not on
 		#if defined(VM_DEBUG)
 			Serial.print("Radios not on");
+			skidSteering->setBothMotorBrakesOn();
 		#endif
 		
 		///////////////////

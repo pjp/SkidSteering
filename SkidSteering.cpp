@@ -11,6 +11,8 @@
 // default constructor
 SkidSteering::SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor)
 {
+	atStartup							= true;
+	
 	directionIsForward					= true;	// General direction of travel.
 
 	directionIsForwardForLeftMotor		= directionIsForward;	// For possible spinning on the spot
@@ -52,20 +54,56 @@ void SkidSteering::setupMotorShield() {
 
 /************************************************************************/
 /*                                                                      */
-/* @param throttle  0-255                                               */
+/* @param throttle  0 = full reverse, 127 = stopped, 255 full forward   */
 /* @param steering  0 = full left, 127 = ahead, 255 full right          */
 /* @return A String containing the state of the variables               */
 /************************************************************************/
 String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 	String state	=	"";
 	
+	state += " Su:";
+	state.concat(atStartup);
+
 	state += " T:";
 	state.concat(throttle);
 	
 	state += " S:";
 	state.concat(steering);
 
-	HEADING heading;	// TODO: calculate this from the throttle and steering inputs
+	uint8_t steeringOffsetFromCentre		= abs(HALF_RANGE_INPUT - steering);
+	state += " So:";
+	state += steeringOffsetFromCentre;
+
+	int throttleOffsetFromCentre			= (HALF_RANGE_INPUT - throttle);
+	state += " To:";
+	state += throttleOffsetFromCentre;
+	
+	// Check to see if the throttle is set to halfway initially
+	if(atStartup && throttleOffsetFromCentre < 1) {
+		atStartup	= false;	// yes - we can start	
+		setBothMotorBrakesOff();
+	}
+	
+	// Check the startup flag
+	if(atStartup) {
+		// Throttle is not halfway indicating no movement so don't carry on
+		return state;
+	}
+	
+	// TODO: calculate heading from the throttle -this is WRONG
+	HEADING heading;
+
+	if(throttleOffsetFromCentre > steeringConfig.deadZone) {
+		heading =	FORWARD;
+	} else if(throttleOffsetFromCentre < steeringConfig.deadZone) {
+		heading	=	BACKWARD;
+	} else {
+		heading	=	STOPPED;
+	}
+	
+	///////////////////////
+	// Increase sensitivity - this is alos WRONG
+	throttle	=	2 * abs(steeringOffsetFromCentre);
 	
 	switch(heading) {
 		case STOPPED:
@@ -99,10 +137,6 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 			break;
 	}
 
-	uint8_t steeringOffsetFromCentre		= abs(HALF_RANGE_INPUT - steering);
-	
-	state += " So:";
-	state += steeringOffsetFromCentre;
 
 	//////////////////////////////////////////////////////////////
 	// Work out the relative throttle values with steering applied

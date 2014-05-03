@@ -41,6 +41,8 @@ class SkidSteering
 //variables
 public:
 protected:
+	bool atStartup;	// Indicate we are at startup 
+	
 private:
 	uint8_t throttleLeft;
 	uint8_t throttleRight;
@@ -61,6 +63,7 @@ public:
 	SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
 	~SkidSteering();
 	String processInputs(uint8_t throttle, uint8_t steering);
+	void setBothMotorBrakesOn();
 
 private:
 
@@ -103,8 +106,6 @@ protected:
 		uint8_t *motorThrottleRight);
 		
 	float getMilliAmpsPerMotor(uint8_t motorPin);
-	
-	void setBothMotorBrakesOn();
 	
 	void setBothMotorBrakesOff();
 	
