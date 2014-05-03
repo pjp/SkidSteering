@@ -76,7 +76,6 @@ void loop()
 	// Read the pulses on the pins from the RX
 	short throttleIn	= pulseIn(THROTTLE,		HIGH, WAIT_FOR_PULSE);
 	short steeringIn	= pulseIn(STEERING,		HIGH, WAIT_FOR_PULSE);
-	short headingIn		= pulseIn(DIRECTION,	HIGH, WAIT_FOR_PULSE);
 	
 	/////////////////////////////
 	// Check if the radios are on
@@ -103,25 +102,9 @@ void loop()
 	uint8_t throttle	= map(throttleIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : throttleIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 	uint8_t steering	= map(steeringIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : steeringIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 
-	///////////////////////////////////////////
-	// Figure out the 3 position heading switch
-	
-	HEADING heading;
-	
-	if(headingIn < QUARTER_PULSE_WIDTH) {
-		heading	=	STOPPED;
-		
-	} else if(headingIn > THREE_QUARTERS_PULSE_WIDTH) {
-		heading	=	BACKWARD;
-		
-	} else {
-		heading	=	FORWARD;
-		
-	}
-	
 	////////////////////
 	// Drive the vehicle
-	String state	=	skidSteering->processInputs(throttle, steering, heading);
+	String state	=	skidSteering->processInputs(throttle, steering);
 	
 	///////////////////
 	// Handle LED state

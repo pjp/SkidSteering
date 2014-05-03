@@ -60,7 +60,7 @@ private:
 public:
 	SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
 	~SkidSteering();
-	String processInputs(uint8_t throttle, uint8_t steering, HEADING heading);
+	String processInputs(uint8_t throttle, uint8_t steering);
 
 private:
 

@@ -54,10 +54,9 @@ void SkidSteering::setupMotorShield() {
 /*                                                                      */
 /* @param throttle  0-255                                               */
 /* @param steering  0 = full left, 127 = ahead, 255 full right          */
-/* @param heading   STOPPED, FORWARD, BACKWARD                          */
 /* @return A String containing the state of the variables               */
 /************************************************************************/
-String SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING heading) {
+String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 	String state	=	"";
 	
 	state += " T:";
@@ -66,6 +65,8 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering, HEADING h
 	state += " S:";
 	state.concat(steering);
 
+	HEADING heading;	// TODO: calculate this from the throttle and steering inputs
+	
 	switch(heading) {
 		case STOPPED:
 			// Apply the brakes if not already on
