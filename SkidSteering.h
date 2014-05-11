@@ -34,7 +34,7 @@ struct SteeringConfig {
 };
 
 enum HEADING		{STOPPED, FORWARD, BACKWARD};
-enum TURN_DIRECTION {LEFT, AHEAD, RIGHT};
+enum TURN_DIRECTION {LEFT, STRAIGHT, RIGHT};
 
 class SkidSteering
 {
@@ -78,29 +78,29 @@ protected:
 	
 	void handleTurning(
 		TURN_DIRECTION direction,
-		uint8_t throttle,
-		uint8_t steering,
+		HEADING heading,
+		uint8_t throttleOffsetFromCentre,
 		uint8_t steeringOffsetFromCentre,
 		uint8_t *motorThrottleLeft,
 		uint8_t *motorThrottleRight);
 
-	void handleAhead(
-	uint8_t throttle,
-	uint8_t steering,
+	void handleStraightAhead(
+	HEADING heading,
+	uint8_t throttleOffsetFromCentre,
 	uint8_t steeringOffsetFromCentre,
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight);
 	
 	void handleTurningLeft(
-		uint8_t throttle,
-		uint8_t steering,
+		HEADING heading,
+		uint8_t throttleOffsetFromCentre,
 		uint8_t steeringOffsetFromCentre,
 		uint8_t *motorThrottleLeft,
 		uint8_t *motorThrottleRight);
 		
 	void handleTurningRight(
-		uint8_t throttle,
-		uint8_t steering,
+		HEADING heading,
+		uint8_t throttleOffsetFromCentre,
 		uint8_t steeringOffsetFromCentre,
 		uint8_t *motorThrottleLeft,
 		uint8_t *motorThrottleRight);
@@ -120,6 +120,8 @@ protected:
 	void setBothMotorsSpeed(short value);
 	
 	void setMotorSpeed(uint8_t pin, short value);
+	
+	bool inDeadZone(int value);
 	
 }; //SkidSteering
 
