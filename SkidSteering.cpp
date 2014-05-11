@@ -58,7 +58,7 @@ void SkidSteering::setupMotorShield() {
 /* @param steering  0 = full left, 127 = ahead, 255 full right          */
 /* @return A String containing the state of the variables               */
 /************************************************************************/
-String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
+String SkidSteering::processInputs(short throttle, short steering) {
 	String state	=	"";
 	
 	state += " Su:";
@@ -70,22 +70,24 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 	state += " S:";
 	state.concat(steering);
 
-	uint8_t steeringOffsetFromCentre		= (HALF_RANGE_INPUT - steering);
+	short  steeringOffsetFromCentre			= (HALF_RANGE_INPUT - steering);
 	state += " So:";
 	state += steeringOffsetFromCentre;
 
-	int throttleOffsetFromCentre			= (HALF_RANGE_INPUT - throttle);
+	short throttleOffsetFromCentre			= (HALF_RANGE_INPUT - throttle);
 	state += " To:";
 	state += throttleOffsetFromCentre;
 	
 	//////////////////////////////////////////////////////////////////////
 	// Check to see if the throttle is set to halfway initially at startup
-	int absThrottleOffsetFromCentre	=	abs(throttleOffsetFromCentre);
+	short absThrottleOffsetFromCentre	=	abs(throttleOffsetFromCentre);
 	
 	if(atStartup && absThrottleOffsetFromCentre < steeringConfig.deadZone) {
 		atStartup	= false;	// yes - we can start	
 		setBothMotorBrakesOff();
-	} else {
+	}
+	
+	if(atStartup) {
 		// Throttle is not halfway indicating no movement so don't carry on
 		return state;
 	}
@@ -132,7 +134,7 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 	
 	int absSteeringOffsetFromCentre	=	abs(steeringOffsetFromCentre);
 	
-	if(inDeadZone(absSteeringOffsetFromCentre)) {
+	if(inDeadZone(steeringOffsetFromCentre)) {
 		handleTurning(STRAIGHT, heading, absThrottleOffsetFromCentre, absSteeringOffsetFromCentre, &throttleLeft, &throttleRight);
 		state += "s";		
 	} else if(steeringOffsetFromCentre > steeringConfig.deadZone) {
@@ -143,10 +145,10 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 		state += "l";
 	}
 	
-	////////////////
-	// Sanity checks
-	throttleLeft	=	constrain(throttleLeft, 0, FULL_RANGE_INPUT);
-	throttleRight	=	constrain(throttleRight, 0, FULL_RANGE_INPUT);
+	//////////////////////////////////////////////////
+	// Sanity checks & convert offsets into full range
+	throttleLeft	=	constrain(throttleLeft * 2, 0, FULL_RANGE_INPUT);
+	throttleRight	=	constrain(throttleRight * 2, 0, FULL_RANGE_INPUT);
 	
 	state += " Tl:";
 	state += throttleLeft;
@@ -177,8 +179,8 @@ String SkidSteering::processInputs(uint8_t throttle, uint8_t steering) {
 	if(! brakesAreOn) {
 		///////////////////////////////////////////////////////////
 		// Spin the motors - throttle values are offset from centre
-		setMotorSpeed(leftMotorPinDef.motorSpeed,	2 * throttleLeft);
-		setMotorSpeed(rightMotorPinDef.motorSpeed,	2 * throttleRight);
+		setMotorSpeed(leftMotorPinDef.motorSpeed,	throttleLeft);
+		setMotorSpeed(rightMotorPinDef.motorSpeed,	throttleRight);
 	}
 	
 	return state;
@@ -198,8 +200,8 @@ String SkidSteering::ftos(float value, int digitCount, int decimalPointsCount) {
 void SkidSteering::handleTurning(
 	TURN_DIRECTION direction,
 	HEADING heading,
-	uint8_t throttleOffsetFromCentre,
-	uint8_t steeringOffsetFromCentre,
+	short throttleOffsetFromCentre,
+	short steeringOffsetFromCentre,
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 	
@@ -218,8 +220,8 @@ void SkidSteering::handleTurning(
 
 void SkidSteering::handleStraightAhead(
 	HEADING heading,
-	uint8_t throttleOffsetFromCentre,
-	uint8_t steeringOffsetFromCentre,
+	short throttleOffsetFromCentre,
+	short steeringOffsetFromCentre,
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 	
@@ -240,84 +242,58 @@ void SkidSteering::handleStraightAhead(
 
 void SkidSteering::handleTurningLeft(
 	HEADING heading,
-	uint8_t throttleOffsetFromCentre,
-	uint8_t steeringOffsetFromCentre,
+	short throttleOffsetFromCentre,
+	short steeringOffsetFromCentre,
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 
-	if(throttleOffsetFromCentre > steeringOffsetFromCentre) {
-		*motorThrottleLeft	=	(throttleOffsetFromCentre - steeringOffsetFromCentre);	// Slow down the left track
-		*motorThrottleRight	=	throttleOffsetFromCentre;
+	if(inDeadZone(throttleOffsetFromCentre)) {
+		//////////////////////////////////////////////////
+		// Need to spin on the spot and reverse left track
+		*motorThrottleLeft	=	steeringOffsetFromCentre;
+		*motorThrottleRight	=	steeringOffsetFromCentre;
 		
-	} else {
-		*motorThrottleRight	=	(throttleOffsetFromCentre + steeringOffsetFromCentre);	// Speed up the right track
-		
-		if(! inDeadZone(throttleOffsetFromCentre)) {
-			*motorThrottleLeft	=	throttleOffsetFromCentre;
-
-			if(directionIsForward != directionIsForwardForLeftMotor) {
-				if(directionIsForward) {
-					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
-				} else {
-					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
-				}
-			}
+		if(directionIsForward) {
+			setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
 		} else {
-			*motorThrottleLeft	=	(2 * steeringOffsetFromCentre);
-
-			///////////////////////////////////
-			// No throttle, so spin on the spot
-			//
-			// Reverse the direction of this motor compared to the other and increase it's speed
-			if(directionIsForward == directionIsForwardForLeftMotor) {
-				if(directionIsForward) {
-					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
-				} else {
-					setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
-				}
-			}
+			setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
+		}
+	} else {
+		if(throttleOffsetFromCentre > steeringOffsetFromCentre) {
+			*motorThrottleLeft	=	(throttleOffsetFromCentre - steeringOffsetFromCentre);	// Slow down the left track
+			*motorThrottleRight	=	throttleOffsetFromCentre;
+		} else {
+			*motorThrottleLeft	=	throttleOffsetFromCentre;
+			*motorThrottleRight	=	(throttleOffsetFromCentre + steeringOffsetFromCentre);	// Speed up the right track
 		}
 	}
 }
 
 void SkidSteering::handleTurningRight(
 	HEADING heading,
-	uint8_t throttleOffsetFromCentre,
-	uint8_t steeringOffsetFromCentre,
+	short throttleOffsetFromCentre,
+	short steeringOffsetFromCentre,
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 
-	if(throttleOffsetFromCentre > steeringOffsetFromCentre) {
-		*motorThrottleLeft	=	throttleOffsetFromCentre;
-		*motorThrottleRight	=	(throttleOffsetFromCentre - steeringOffsetFromCentre);	// Slow down the right track
+	if(inDeadZone(throttleOffsetFromCentre)) {
+		//////////////////////////////////////////////////
+		// Need to spin on the spot and reverse right track
+		*motorThrottleLeft	=	steeringOffsetFromCentre;
+		*motorThrottleRight	=	steeringOffsetFromCentre;
 		
-	} else {
-		*motorThrottleLeft	=	(throttleOffsetFromCentre + steeringOffsetFromCentre);	// Speed up the left track
-		
-		if(! inDeadZone(throttleOffsetFromCentre)) {
-			*motorThrottleRight	=	throttleOffsetFromCentre ;
-
-			if(directionIsForward != directionIsForwardForRightMotor) {
-				if(directionIsForward) {
-					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
-				} else {
-					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
-				}
-			}
+		if(directionIsForward) {
+			setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
 		} else {
-			*motorThrottleRight	=	(2 * steeringOffsetFromCentre);
-
-			///////////////////////////////////
-			// No throttle, so spin on the spot
-			//
-			// Reverse the direction of this motor compared to the other and increase it's speed
-			if(directionIsForward == directionIsForwardForRightMotor) {
-				if(directionIsForward) {
-					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
-				} else {
-					setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
-				}
-			}
+			setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
+		}
+	} else {
+		if(throttleOffsetFromCentre > steeringOffsetFromCentre) {
+			*motorThrottleRight	=	(throttleOffsetFromCentre - steeringOffsetFromCentre);	// Slow down the right track
+			*motorThrottleLeft	=	throttleOffsetFromCentre;
+		} else {
+			*motorThrottleRight	=	throttleOffsetFromCentre;
+			*motorThrottleLeft	=	(throttleOffsetFromCentre + steeringOffsetFromCentre);	// Speed up the left track
 		}
 	}
 }

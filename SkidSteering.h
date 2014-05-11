@@ -62,7 +62,7 @@ private:
 public:
 	SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
 	~SkidSteering();
-	String processInputs(uint8_t throttle, uint8_t steering);
+	String processInputs(short throttle, short steering);
 	void setBothMotorBrakesOn();
 
 private:
@@ -79,29 +79,29 @@ protected:
 	void handleTurning(
 		TURN_DIRECTION direction,
 		HEADING heading,
-		uint8_t throttleOffsetFromCentre,
-		uint8_t steeringOffsetFromCentre,
+		short throttleOffsetFromCentre,
+		short steeringOffsetFromCentre,
 		uint8_t *motorThrottleLeft,
 		uint8_t *motorThrottleRight);
 
 	void handleStraightAhead(
-	HEADING heading,
-	uint8_t throttleOffsetFromCentre,
-	uint8_t steeringOffsetFromCentre,
-	uint8_t *motorThrottleLeft,
-	uint8_t *motorThrottleRight);
+		HEADING heading,
+		short throttleOffsetFromCentre,
+		short steeringOffsetFromCentre,
+		uint8_t *motorThrottleLeft,
+		uint8_t *motorThrottleRight);
 	
 	void handleTurningLeft(
 		HEADING heading,
-		uint8_t throttleOffsetFromCentre,
-		uint8_t steeringOffsetFromCentre,
+		short throttleOffsetFromCentre,
+		short steeringOffsetFromCentre,
 		uint8_t *motorThrottleLeft,
 		uint8_t *motorThrottleRight);
 		
 	void handleTurningRight(
 		HEADING heading,
-		uint8_t throttleOffsetFromCentre,
-		uint8_t steeringOffsetFromCentre,
+		short throttleOffsetFromCentre,
+		short steeringOffsetFromCentre,
 		uint8_t *motorThrottleLeft,
 		uint8_t *motorThrottleRight);
 		

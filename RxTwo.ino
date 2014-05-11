@@ -74,8 +74,8 @@ void loop()
 	
 	//////////////////////////////////////////
 	// Read the pulses on the pins from the RX
-	short throttleIn	= pulseIn(THROTTLE,		HIGH, WAIT_FOR_PULSE);
-	short steeringIn	= pulseIn(STEERING,		HIGH, WAIT_FOR_PULSE);
+	unsigned long throttleIn	= pulseIn(THROTTLE,		HIGH, WAIT_FOR_PULSE);
+	unsigned long steeringIn	= pulseIn(STEERING,		HIGH, WAIT_FOR_PULSE);
 	
 	/////////////////////////////
 	// Check if the radios are on
@@ -100,8 +100,8 @@ void loop()
 	
 	/////////////////////////
 	// Normalize these inputs
-	uint8_t throttle	= map(throttleIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : throttleIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
-	uint8_t steering	= map(steeringIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : steeringIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
+	short throttle	= map(throttleIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : throttleIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
+	short steering	= map(steeringIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : steeringIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 
 	////////////////////
 	// Drive the vehicle
