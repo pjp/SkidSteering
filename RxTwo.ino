@@ -42,7 +42,7 @@ void setup()
 
 	//////////////////////////
 	// Define steering configuration
-	config.deadZone				= 10;
+	config.deadZone				= 20;
 	config.directionChangeDelay	= DIRECTION_CHANGE_DELAY_MS;
 	config.voltsPerAmp			= VOLTS_PER_AMP;
 	config.voltsPerBit			= VOLTS_PER_BIT;
