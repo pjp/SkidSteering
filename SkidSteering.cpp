@@ -70,11 +70,11 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	state += " S:";
 	state.concat(steering);
 
-	short  steeringOffsetFromCentre			= (HALF_RANGE_INPUT - steering);
+	short  steeringOffsetFromCentre			= (steering - HALF_RANGE_INPUT);
 	state += " So:";
 	state += steeringOffsetFromCentre;
 
-	short throttleOffsetFromCentre			= (HALF_RANGE_INPUT - throttle);
+	short throttleOffsetFromCentre			= (throttle - HALF_RANGE_INPUT);
 	state += " To:";
 	state += throttleOffsetFromCentre;
 	
