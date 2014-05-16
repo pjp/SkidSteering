@@ -48,11 +48,12 @@ private:
 	uint8_t throttleRight;
 	uint8_t steeringOffsetFromCentre;
 	
-	bool directionIsForward;
+	bool generalDirectionIsForward;
 	bool directionIsForwardForLeftMotor;
 	bool directionIsForwardForRightMotor;
 	bool brakesAreOn;
-
+	bool weAreStopped;
+	
 	SteeringConfig steeringConfig;
 
 	MotorPinDefinition leftMotorPinDef, rightMotorPinDef;
@@ -110,6 +111,8 @@ protected:
 	void setBothMotorBrakesOff();
 	
 	void setMotorBrake(uint8_t pin, boolean on);
+	
+	void syncDirectionOfBothMotorsToGeneralDirection();
 	
 	void setDirectionOfBothMotorsToForward();
 	

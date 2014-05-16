@@ -13,13 +13,15 @@ SkidSteering::SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, 
 {
 	atStartup							= true;
 	
-	directionIsForward					= true;	// General direction of travel.
+	generalDirectionIsForward			= true;	// General direction of travel.
 
-	directionIsForwardForLeftMotor		= directionIsForward;	// For possible spinning on the spot
+	directionIsForwardForLeftMotor		= generalDirectionIsForward;	// For possible spinning on the spot
 	
-	directionIsForwardForRightMotor		= directionIsForward;	// For possible spinning on the spot
+	directionIsForwardForRightMotor		= generalDirectionIsForward;	// For possible spinning on the spot
 
 	brakesAreOn							= true;	// Motor brakes applied.
+	
+	weAreStopped						= true;
 	
 	steeringConfig						= config;
 	
@@ -84,6 +86,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	
 	if(atStartup && absThrottleOffsetFromCentre < steeringConfig.deadZone) {
 		atStartup	= false;	// yes - we can start	
+		
 		setBothMotorBrakesOff();
 	}
 	
@@ -92,36 +95,34 @@ String SkidSteering::processInputs(short throttle, short steering) {
 		return state;
 	}
 	
-	// TODO: calculate heading from the throttle
+	//////////////////////////////////////////
+	// Calculate the heading from the throttle
 	HEADING heading;
 	
 	if(inDeadZone(absThrottleOffsetFromCentre)) {
-		heading	=	STOPPED;
-		state +=	" Hd:S";
+		heading			=	STOPPED;
+		state			+=	" Hd:S";
+		weAreStopped	=	true;
 		
 	} else if(throttleOffsetFromCentre > steeringConfig.deadZone) {
-		heading =	FORWARD;
-
-		// Set the direction to forward if not already so
-		if(! directionIsForward) {
-			setDirectionOfBothMotorsToForward();
-			//setBothMotorBrakesOff();
-				
-			delay(steeringConfig.directionChangeDelay);
-		}
-		state +=	" Hd:F";
+		heading						=	FORWARD;
+		generalDirectionIsForward	=	 true;
+		
+		syncDirectionOfBothMotorsToGeneralDirection();
+		
+		weAreStopped		=	false;
+		
+		state				+=	" Hd:F";
 		
 	} else {
-		heading	=	BACKWARD;
-		// Set the direction to reverse if not already so
+		heading						=	BACKWARD;
+		generalDirectionIsForward	=	 false;
 		
-		if(directionIsForward) {
-			setDirectionOfBothMotorsToReverse();
-			//setBothMotorBrakesOff();
-				
-			delay(steeringConfig.directionChangeDelay);
-		}
-		state +=	" Hd:B";
+		syncDirectionOfBothMotorsToGeneralDirection();
+
+		weAreStopped		=	false;
+		
+		state				+=	" Hd:B";
 		
 	}
 	
@@ -157,7 +158,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	state += throttleRight;
 
 	state += " Df:";
-	state += directionIsForward;
+	state += generalDirectionIsForward;
 	
 	state += " Dfl:";
 	state +=directionIsForwardForLeftMotor;
@@ -225,17 +226,6 @@ void SkidSteering::handleStraightAhead(
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 	
-	if(inDeadZone(throttleOffsetFromCentre)) {
-		/////////////////////////////////////////////////////////////////
-		// Make sure the general direction is correct since one motor may
-		// be in the opposite direction
-		if(directionIsForward) {
-			setDirectionOfBothMotorsToForward();
-		} else {
-			setDirectionOfBothMotorsToReverse();
-		}
-	}
-	
 	*motorThrottleLeft	= throttleOffsetFromCentre;
 	*motorThrottleRight	= throttleOffsetFromCentre;
 }
@@ -247,13 +237,13 @@ void SkidSteering::handleTurningLeft(
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 
-	if(inDeadZone(throttleOffsetFromCentre)) {
+	if(weAreStopped) {
 		//////////////////////////////////////////////////
 		// Need to spin on the spot and reverse left track
 		*motorThrottleLeft	=	steeringOffsetFromCentre;
 		*motorThrottleRight	=	steeringOffsetFromCentre;
 		
-		if(directionIsForward) {
+		if(generalDirectionIsForward) {
 			setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
 		} else {
 			setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
@@ -276,13 +266,13 @@ void SkidSteering::handleTurningRight(
 	uint8_t *motorThrottleLeft,
 	uint8_t *motorThrottleRight) {
 
-	if(inDeadZone(throttleOffsetFromCentre)) {
+	if(weAreStopped) {
 		//////////////////////////////////////////////////
 		// Need to spin on the spot and reverse right track
 		*motorThrottleLeft	=	steeringOffsetFromCentre;
 		*motorThrottleRight	=	steeringOffsetFromCentre;
 		
-		if(directionIsForward) {
+		if(generalDirectionIsForward) {
 			setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
 		} else {
 			setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
@@ -334,18 +324,38 @@ void SkidSteering::setMotorBrake(uint8_t pin, boolean on) {
 	}
 }
 
-void SkidSteering::setDirectionOfBothMotorsToForward() {
-	setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
-	setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
+void SkidSteering::syncDirectionOfBothMotorsToGeneralDirection() {
+	if(generalDirectionIsForward != directionIsForwardForLeftMotor) {
+		setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, generalDirectionIsForward);
+	}
 	
-	directionIsForward	= true;
+	if(generalDirectionIsForward != directionIsForwardForRightMotor) {
+		setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, generalDirectionIsForward);	
+	}
+}
+
+void SkidSteering::setDirectionOfBothMotorsToForward() {
+	if(! directionIsForwardForLeftMotor) {
+		setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, true);
+	}
+	
+	if(! directionIsForwardForRightMotor) {
+		setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, true);
+	}
+	
+	generalDirectionIsForward	= true;
 }
 
 void SkidSteering::setDirectionOfBothMotorsToReverse() {
-	setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
-	setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
-
-	directionIsForward	= false;
+	if(directionIsForwardForLeftMotor) {
+		setDirectionOfMotorToForward(leftMotorPinDef.motorDirection, false);
+	}
+	
+	if(directionIsForwardForRightMotor) {
+		setDirectionOfMotorToForward(rightMotorPinDef.motorDirection, false);
+	}
+	
+	generalDirectionIsForward	= false;
 }
 
 void SkidSteering::setDirectionOfMotorToForward(uint8_t pin, boolean forward) {
