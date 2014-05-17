@@ -13,8 +13,11 @@
 #define TICK_DELAY_MS		250		// How long (in mS) to delay in each loop
 #define DIRECTION_CHANGE_DELAY_MS	500		// How long (in mS) to delay after a direction change
 
-#define	MIN_PULSE_WIDTH		1000
-#define	MAX_PULSE_WIDTH		2000
+/////////////////////////////////////////////
+// These depend on the specific receiver used
+#define	MIN_PULSE_WIDTH		990
+#define	MAX_PULSE_WIDTH		1990
+
 #define	WAIT_FOR_PULSE		20000
 
 const int MIN_MILLI_VOLTS		=	6600;	// 6 * 1.1
@@ -23,6 +26,8 @@ const uint8_t REFERENCE_VOLTS	=	5;   // the default reference on a 5-volt board
 const float VOLTS_PER_BIT		=	REFERENCE_VOLTS / 1024.0;
 const float VOLTS_PER_AMP		=	1.65;
 const float RESISTOR_FACTOR		=	1024.0 / 2;
+
+const int DEAD_ZONE_RANGE		=	20;
 
 DisplayValueOnLed			dvol(LED_PIN, 0, 1, 8);	// For using the LED to display battery state
 
@@ -41,7 +46,7 @@ void setup()
 
 	//////////////////////////
 	// Define steering configuration
-	config.deadZone				= 20;
+	config.deadZone				= DEAD_ZONE_RANGE;
 	config.directionChangeDelay	= DIRECTION_CHANGE_DELAY_MS;
 	config.voltsPerAmp			= VOLTS_PER_AMP;
 	config.voltsPerBit			= VOLTS_PER_BIT;
