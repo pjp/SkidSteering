@@ -6,11 +6,9 @@
 #define THROTTLE			4	// Digital pin
 #define STEERING			5	// Digital pin
 
-#define LED_PIN				7	// Digital pin
 
 #define SUPPLY_VOLTAGE_PIN	2	// Analogue pin
-
-#define TICK_DELAY_MS		250		// How long (in mS) to delay in each loop
+#define TICK_DELAY_MS		250				// How long (in mS) to delay in each loop
 #define DIRECTION_CHANGE_DELAY_MS	500		// How long (in mS) to delay after a direction change
 
 /////////////////////////////////////////////
@@ -22,12 +20,21 @@
 
 const int MIN_MILLI_VOLTS		=	6600;	// 6 * 1.1
 const int MAX_MILLI_VOLTS		=	8400;	// 6 * 1.4
-const uint8_t REFERENCE_VOLTS	=	5;   // the default reference on a 5-volt board
+
+const uint8_t REFERENCE_VOLTS	=	5;		// the default reference on a 5-volt board
 const float VOLTS_PER_BIT		=	REFERENCE_VOLTS / 1024.0;
 const float VOLTS_PER_AMP		=	1.65;
 const float RESISTOR_FACTOR		=	1024.0 / 2;
 
 const int DEAD_ZONE_RANGE		=	30;
+
+/********************************************************************************
+* @param ledPin								// The digital pin the led is on
+* @param value								// The initial value to display as LED flashes
+* @param ledOnCountInTicks					// How many ticks for the LED to remain on, off time is the same
+* @param repeatDelayCountInTicks			// How many ticks between displaying the value
+*/
+#define LED_PIN				7	// Digital pin
 
 DisplayValueOnLed			dvol(LED_PIN, 0, 1, 8);	// For using the LED to display battery state
 
