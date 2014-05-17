@@ -27,7 +27,7 @@ const float VOLTS_PER_BIT		=	REFERENCE_VOLTS / 1024.0;
 const float VOLTS_PER_AMP		=	1.65;
 const float RESISTOR_FACTOR		=	1024.0 / 2;
 
-const int DEAD_ZONE_RANGE		=	20;
+const int DEAD_ZONE_RANGE		=	30;
 
 DisplayValueOnLed			dvol(LED_PIN, 0, 1, 8);	// For using the LED to display battery state
 

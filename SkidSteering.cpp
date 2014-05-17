@@ -40,11 +40,9 @@ void SkidSteering::reset() {
 	
 	directionIsForwardForRightMotor		= generalDirectionIsForward;	// For possible spinning on the spot
 
-	brakesAreOn							= true;	// Motor brakes applied.
-	
 	weAreStopped						= true;	// Not moving
 	
-
+	setBothMotorBrakesOn();
 }
 
 void SkidSteering::setupMotorShield() {
