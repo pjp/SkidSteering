@@ -5,7 +5,6 @@
 //The throttle and rudder pins
 #define THROTTLE			4	// Digital pin
 #define STEERING			5	// Digital pin
-#define DIRECTION			6	// Digital pin
 
 #define LED_PIN				7	// Digital pin
 
@@ -125,7 +124,6 @@ void loop()
 void setupRxInput() {
 	pinMode(THROTTLE,	INPUT);
 	pinMode(STEERING,	INPUT);
-	pinMode(DIRECTION,	INPUT);
 }
 
 float getSupplyVoltage() {
