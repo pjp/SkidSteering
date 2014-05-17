@@ -80,12 +80,17 @@ void loop()
 	/////////////////////////////
 	// Check if the radios are on
 	if(throttleIn < (MIN_PULSE_WIDTH / 2)) {
+		
+		/////////////////////////////////
 		// Receiver or transmitter not on
 		#if defined(VM_DEBUG)
 			Serial.print("Radios not on");
-			skidSteering->setBothMotorBrakesOn();
 		#endif
 		
+		///////////////////////
+		// Reset internal state
+		skidSteering->reset();
+
 		///////////////////
 		// Handle LED state
 		updateLedValue();

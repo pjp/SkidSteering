@@ -8,9 +8,30 @@
 
 #include "SkidSteering.h"
 
+//////////////////////
 // default constructor
 SkidSteering::SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor)
 {
+	steeringConfig						= config;
+	
+	leftMotorPinDef						= leftMotor;
+	
+	rightMotorPinDef					= rightMotor;
+	
+	reset();
+
+	setupMotorShield();
+} 
+
+/////////////////////
+// default destructor
+SkidSteering::~SkidSteering()
+{
+} 
+
+///////////////////////////
+// (Re)Initialize variables
+void SkidSteering::reset() {
 	atStartup							= true;
 	
 	generalDirectionIsForward			= true;	// General direction of travel.
@@ -21,21 +42,10 @@ SkidSteering::SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, 
 
 	brakesAreOn							= true;	// Motor brakes applied.
 	
-	weAreStopped						= true;
+	weAreStopped						= true;	// Not moving
 	
-	steeringConfig						= config;
-	
-	leftMotorPinDef						= leftMotor;
-	
-	rightMotorPinDef					= rightMotor;
-	
-	setupMotorShield();
-} 
 
-// default destructor
-SkidSteering::~SkidSteering()
-{
-} //~SkidSteering
+}
 
 void SkidSteering::setupMotorShield() {
 	//////////////////
@@ -53,6 +63,7 @@ void SkidSteering::setupMotorShield() {
 	// Initially apply the brakes
 	setBothMotorBrakesOn();
 }
+
 
 /************************************************************************/
 /*                                                                      */

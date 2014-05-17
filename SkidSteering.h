@@ -62,13 +62,18 @@ private:
 //functions
 public:
 	SkidSteering(SteeringConfig config, MotorPinDefinition leftMotor, MotorPinDefinition rightMotor);
+	
 	~SkidSteering();
+	
+	void reset();
+	
 	String processInputs(short throttle, short steering);
-	void setBothMotorBrakesOn();
+
 
 private:
 
 	SkidSteering( const SkidSteering &c );
+	
 	SkidSteering& operator=( const SkidSteering &c );
 	
 protected:
@@ -119,6 +124,8 @@ protected:
 	void setDirectionOfBothMotorsToReverse();
 	
 	void setDirectionOfMotorToForward(uint8_t pin, boolean forward);
+	
+	void setBothMotorBrakesOn();
 	
 	void setBothMotorsSpeed(short value);
 	
