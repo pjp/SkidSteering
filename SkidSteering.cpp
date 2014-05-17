@@ -148,13 +148,19 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	
 	if(inDeadZone(steeringOffsetFromCentre)) {
 		handleTurning(STRAIGHT, heading, absThrottleOffsetFromCentre, absSteeringOffsetFromCentre, &throttleLeft, &throttleRight);
+		
 		state += "s";		
+		
 	} else if(steeringOffsetFromCentre > steeringConfig.deadZone) {
 		handleTurning(RIGHT, heading, absThrottleOffsetFromCentre, absSteeringOffsetFromCentre, &throttleLeft, &throttleRight);
+		
 		state += "r";
+		
 	} else {
 		handleTurning(LEFT, heading, absThrottleOffsetFromCentre, absSteeringOffsetFromCentre, &throttleLeft, &throttleRight);
+		
 		state += "l";
+		
 	}
 	
 	//////////////////////////////////////////////////
