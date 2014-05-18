@@ -88,14 +88,21 @@ void loop()
 	unsigned long throttleIn	= pulseIn(THROTTLE,		HIGH, WAIT_FOR_PULSE);
 	unsigned long steeringIn	= pulseIn(STEERING,		HIGH, WAIT_FOR_PULSE);
 	
+	#if defined(VM_DEBUG)
+		Serial.print("Tr:");
+		Serial.print(throttleIn);
+		Serial.print(" Sr:");
+		Serial.print(steeringIn);
+	#endif
+	
 	/////////////////////////////
 	// Check if the radios are on
-	if(throttleIn < (MIN_PULSE_WIDTH / 2)) {
+	if(throttleIn < (MIN_PULSE_WIDTH / 2) || steeringIn < (MIN_PULSE_WIDTH / 2)) {
 		
-		/////////////////////////////////
-		// Receiver or transmitter not on
+		///////////////////////////////////////////////////
+		// Receiver or transmitter possibly not switched on
 		#if defined(VM_DEBUG)
-			Serial.print("Radios not on");
+			Serial.print(" Radios not on");
 		#endif
 		
 		///////////////////////

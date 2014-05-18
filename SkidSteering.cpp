@@ -107,7 +107,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	if(atStartup) {
 		//////////////////////////////////////////
 		// At initial startup or having been reset
-		if(absThrottleOffsetFromCentre <= steeringConfig.deadZone) {
+		if(inDeadZone(absThrottleOffsetFromCentre)) {
 			//////////////////////////////////////
 			// Throttle is in the neutral position
 			// bump the counter

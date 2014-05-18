@@ -18,7 +18,7 @@
 #define QUARTER_PULSE_WIDTH			(MIN_PULSE_WIDTH + (FULL_PULSE_WIDTH / 4))
 #define THREE_QUARTERS_PULSE_WIDTH	(MIN_PULSE_WIDTH + (3 * (FULL_PULSE_WIDTH / 4)))
 
-#define MIN_STARTUP_COUNT	4
+#define MIN_STARTUP_COUNT	20
 
 struct MotorPinDefinition {
 	uint8_t motorAmps;
