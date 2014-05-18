@@ -34,6 +34,8 @@ SkidSteering::~SkidSteering()
 void SkidSteering::reset() {
 	atStartup							= true;
 	
+	startupCount						= 0;
+	
 	generalDirectionIsForward			= true;	// General direction of travel.
 
 	directionIsForwardForLeftMotor		= generalDirectionIsForward;	// For possible spinning on the spot
@@ -75,6 +77,9 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	state += " Su:";
 	state.concat(atStartup);
 
+	state += " Sc:";
+	state.concat(startupCount);
+
 	state += " T:";
 	state.concat(throttle);
 	
@@ -89,19 +94,49 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	state += " To:";
 	state += throttleOffsetFromCentre;
 	
-	//////////////////////////////////////////////////////////////////////
-	// Check to see if the throttle is set to halfway initially at startup
 	short absThrottleOffsetFromCentre	=	abs(throttleOffsetFromCentre);
 	
-	if(atStartup && absThrottleOffsetFromCentre < steeringConfig.deadZone) {
-		atStartup	= false;	// yes - we can start	
-		
-		setBothMotorBrakesOff();
-	}
-	
+	///////////////////////////////////////////////////////////////////////
+	// Check to see if the throttle is set to halfway initially at startup.
+	//
+	// This check is needed because the transmitter will not send a signal until
+	// all controls are in their off state, and the off state for the throttle
+	// is actually full reverse. The reason for the counter is to catch spurious
+	// signals from the transmitter, want make sure the throttle is in the neutral
+	// position for a little while.
 	if(atStartup) {
-		// Throttle is not halfway indicating no movement so don't carry on
-		return state;
+		//////////////////////////////////////////
+		// At initial startup or having been reset
+		if(absThrottleOffsetFromCentre <= steeringConfig.deadZone) {
+			//////////////////////////////////////
+			// Throttle is in the neutral position
+			// bump the counter
+			startupCount++;
+			
+			if(startupCount < MIN_STARTUP_COUNT) {
+				///////////////////////////////////////////////
+				// Not been at neutral position for long enough
+				return state;
+			}
+
+			////////////////////////////////////////////
+			// Flag the fact we are no longer at startup
+			atStartup		= false;
+			
+			startupCount	= 0;	// Reset the counter just in case
+			
+			////////////////////////////////////
+			// It's ok to release the brakes now
+			// and carry on
+			setBothMotorBrakesOff();
+			
+		} else {
+			//////////////////////////////////////////
+			// Throttle is NOT in the neutral position
+			startupCount	= 0;	// Reset counter
+
+			return state;
+		}
 	}
 	
 	//////////////////////////////////////////
