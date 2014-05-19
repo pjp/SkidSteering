@@ -108,8 +108,6 @@ String SkidSteering::processInputs(short throttle, short steering) {
 		if(inDeadZone(absThrottleOffsetFromCentre)) {
 			//////////////////////////////////////
 			// Throttle is in the neutral position
-
-			
 			if(! completedStartupMovement) {
 				///////////////////////////////////////////////
 				// Did not complete the startup movement
@@ -129,15 +127,17 @@ String SkidSteering::processInputs(short throttle, short steering) {
 			//////////////////////////////////////////
 			// Throttle is NOT in the neutral position
 			//
-			// Check for the completed startup movement
+			// Check for the completed startup movement if not already checked
 			//
 			// full forward throttle and full right steering.
-			short triggerLevel	= (FULL_RANGE_INPUT - steeringConfig.deadZone);
-			
-			if(throttle >= triggerLevel && steering >= triggerLevel) {
-				completedStartupMovement	=	true;	
-			}
+			if(! completedStartupMovement) {}
+				short triggerLevel	= (FULL_RANGE_INPUT - steeringConfig.deadZone);
 
+				if(throttle >= triggerLevel && steering >= triggerLevel) {
+					completedStartupMovement	=	true;	
+				}
+			}
+			
 			return state;
 		}
 	}
