@@ -34,7 +34,7 @@ SkidSteering::~SkidSteering()
 void SkidSteering::reset() {
 	atStartup							= true;
 	
-	startupCount						= 0;
+	completedStartupMovement			= false;
 	
 	generalDirectionIsForward			= true;	// General direction of travel.
 
@@ -78,7 +78,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	state.concat(atStartup);
 
 	state += " Sc:";
-	state.concat(startupCount);
+	state.concat(completedStartupMovement);
 
 	state += " T:";
 	state.concat(throttle);
@@ -101,29 +101,24 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	//
 	// This check is needed because the transmitter will not send a signal until
 	// all controls are in their off state, and the off state for the throttle
-	// is actually full reverse. The reason for the counter is to catch spurious
-	// signals from the transmitter, want make sure the throttle is in the neutral
-	// position for a little while.
+	// is actually full reverse. 
 	if(atStartup) {
 		//////////////////////////////////////////
 		// At initial startup or having been reset
 		if(inDeadZone(absThrottleOffsetFromCentre)) {
 			//////////////////////////////////////
 			// Throttle is in the neutral position
-			// bump the counter
-			startupCount++;
+
 			
-			if(startupCount < MIN_STARTUP_COUNT) {
+			if(! completedStartupMovement) {
 				///////////////////////////////////////////////
-				// Not been at neutral position for long enough
+				// Did not complete the startup movement
 				return state;
 			}
 
 			////////////////////////////////////////////
 			// Flag the fact we are no longer at startup
 			atStartup		= false;
-			
-			startupCount	= 0;	// Reset the counter just in case
 			
 			////////////////////////////////////
 			// It's ok to release the brakes now
@@ -133,7 +128,15 @@ String SkidSteering::processInputs(short throttle, short steering) {
 		} else {
 			//////////////////////////////////////////
 			// Throttle is NOT in the neutral position
-			startupCount	= 0;	// Reset counter
+			//
+			// Check for the completed startup movement
+			//
+			// full forward throttle and full right steering.
+			short triggerLevel	= (FULL_RANGE_INPUT - steeringConfig.deadZone);
+			
+			if(throttle >= triggerLevel && steering >= triggerLevel) {
+				completedStartupMovement	=	true;	
+			}
 
 			return state;
 		}

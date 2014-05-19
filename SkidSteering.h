@@ -18,8 +18,6 @@
 #define QUARTER_PULSE_WIDTH			(MIN_PULSE_WIDTH + (FULL_PULSE_WIDTH / 4))
 #define THREE_QUARTERS_PULSE_WIDTH	(MIN_PULSE_WIDTH + (3 * (FULL_PULSE_WIDTH / 4)))
 
-#define MIN_STARTUP_COUNT	20
-
 struct MotorPinDefinition {
 	uint8_t motorAmps;
 	uint8_t motorBrake;
@@ -43,7 +41,7 @@ class SkidSteering
 public:
 protected:
 	bool atStartup;	// Indicate we are at startup 
-	int startupCount;
+	bool completedStartupMovement;
 	
 private:
 	uint8_t throttleLeft;
