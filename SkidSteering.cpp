@@ -130,7 +130,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 			// Check for the completed startup movement if not already checked
 			//
 			// full forward throttle and full right steering.
-			if(! completedStartupMovement) {}
+			if(! completedStartupMovement) {
 				short triggerLevel	= (FULL_RANGE_INPUT - steeringConfig.deadZone);
 
 				if(throttle >= triggerLevel && steering >= triggerLevel) {
