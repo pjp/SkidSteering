@@ -34,7 +34,7 @@ SkidSteering::~SkidSteering()
 void SkidSteering::reset() {
 	atStartup							= true;
 	
-	completedStartupMovement			= false;
+	completedThrottleStartupMovement	= false;
 	
 	generalDirectionIsForward			= true;	// General direction of travel.
 
@@ -64,6 +64,9 @@ void SkidSteering::setupMotorShield() {
 	setBothMotorBrakesOn();
 }
 
+bool SkidSteering::isCompletedThottleStartupMovement() {
+	return completedThrottleStartupMovement;
+}
 
 /************************************************************************/
 /*                                                                      */
@@ -78,7 +81,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 	state.concat(atStartup);
 
 	state += " Sc:";
-	state.concat(completedStartupMovement);
+	state.concat(completedThrottleStartupMovement);
 
 	state += " T:";
 	state.concat(throttle);
@@ -108,7 +111,7 @@ String SkidSteering::processInputs(short throttle, short steering) {
 		if(inDeadZone(absThrottleOffsetFromCentre)) {
 			//////////////////////////////////////
 			// Throttle is in the neutral position
-			if(! completedStartupMovement) {
+			if(! completedThrottleStartupMovement) {
 				///////////////////////////////////////////////
 				// Did not complete the startup movement
 				return state;
@@ -130,11 +133,11 @@ String SkidSteering::processInputs(short throttle, short steering) {
 			// Check for the completed startup movement if not already checked
 			//
 			// full forward throttle and full right steering.
-			if(! completedStartupMovement) {
+			if(! completedThrottleStartupMovement) {
 				short triggerLevel	= (FULL_RANGE_INPUT - steeringConfig.deadZone);
 
 				if(throttle >= triggerLevel && steering >= triggerLevel) {
-					completedStartupMovement	=	true;	
+					completedThrottleStartupMovement	=	true;	
 				}
 			}
 			

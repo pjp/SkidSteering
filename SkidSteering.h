@@ -41,7 +41,7 @@ class SkidSteering
 public:
 protected:
 	bool atStartup;	// Indicate we are at startup 
-	bool completedStartupMovement;
+	bool completedThrottleStartupMovement;
 	
 private:
 	uint8_t throttleLeft;
@@ -69,7 +69,8 @@ public:
 	
 	String processInputs(short throttle, short steering);
 
-
+	bool isCompletedThottleStartupMovement();
+	
 private:
 
 	SkidSteering( const SkidSteering &c );

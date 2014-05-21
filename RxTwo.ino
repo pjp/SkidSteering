@@ -109,9 +109,9 @@ void loop()
 		// Reset internal state
 		skidSteering->reset();
 
-		///////////////////
-		// Handle LED state
-		updateLedValue();
+		////////////////////////////////////////////////////////////////////////////////
+		// Keep the LED on to indicate we haven't detected the startup throttle movement
+		digitalWrite(LED_PIN, HIGH);
 		
 		#if defined(VM_DEBUG)
 			Serial.println("");
@@ -126,13 +126,20 @@ void loop()
 	short throttle	= map(throttleIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : throttleIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 	short steering	= map(steeringIn	< MIN_PULSE_WIDTH ? MIN_PULSE_WIDTH : steeringIn,	MIN_PULSE_WIDTH, MAX_PULSE_WIDTH, 0, FULL_RANGE_INPUT);
 
-	////////////////////
-	// Drive the vehicle
+	////////////////////////////
+	// Try and drive the vehicle
 	String state	=	skidSteering->processInputs(throttle, steering);
 	
-	///////////////////
-	// Handle LED state
-	updateLedValue();
+	if(skidSteering->isCompletedThottleStartupMovement()) {
+		//////////////////////////////////////////////
+		// Handle LED state to indicate supply voltage
+		updateLedValue();
+	} else {
+		////////////////////////////////////////////////////////////////////////////////
+		// Keep the LED on to indicate we haven't detected the startup throttle movement
+		digitalWrite(LED_PIN, HIGH);
+	}
+
 	
 	#if defined(VM_DEBUG)
 		Serial.println(state);
